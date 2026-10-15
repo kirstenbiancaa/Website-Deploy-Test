@@ -1,0 +1,603 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mochi Arcade</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&family=Silkscreen:wght@400;700&display=swap">
+<style>
+/* Layout: soft lavender world. Hero pairs a big headline with a playable arcade cabinet,
+   then a game shelf, a bigger second game, and a grid of the eight round pals. */
+:root{
+  --bg:#f4f0ff; --dot:#e2daf9; --surface:#ffffff; --surface-2:#ebe5ff;
+  --ink:#2b2150; --muted:#655b8c; --line:#d8cdf7;
+  --accent:#6f4df0; --accent-deep:#4f31c4; --on-accent:#ffffff;
+  --pink:#ff7fae; --pink-deep:#d95a8a; --pink-soft:#ffe0ec;
+  --mint:#4fd3b0; --mint-soft:#d5f6ec; --sun:#ffd24d; --sun-soft:#fff0b8; --sky-soft:#d6e9ff;
+  --hl:rgba(255,210,77,.95);
+  --cab:#7f5dff; --cab-deep:#5236cc; --marquee:#ffd24d; --marquee-ink:#3a2a55;
+  --screen:#251b4b; --screen-ink:#f3eeff; --screen-muted:#b9acec;
+  --tile:#d5f6ec; --lip:#5ccaa8; --lip-edge:#3fae8c; --pit:#2a1f4d;
+  --face:#3a2a55; --disc:#f6f2ff; --cardface:#fbf9ff;
+  --c-cat:#ffb4c8; --c-bunny:#fdf0ff; --c-bear:#e8b98a; --c-frog:#9be8b0;
+  --c-chick:#ffe27a; --c-ghost:#e4e0ff; --c-slime:#7fe0e8; --c-panda:#ffffff; --c-gold:#ffd24d;
+  --shadow:rgba(60,36,140,.24);
+  --font-display:'Fredoka','Nunito',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-pixel:'Silkscreen','Courier New',monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16102b; --dot:#221a42; --surface:#221a41; --surface-2:#2e2459;
+    --ink:#f2edff; --muted:#b7abe0; --line:#3c3070;
+    --accent:#a58bff; --accent-deep:#7357e0; --on-accent:#17102e;
+    --pink-soft:#4a2745; --mint-soft:#1f4244; --sun-soft:#4a3f1d; --sky-soft:#23396b;
+    --hl:rgba(255,210,77,.3);
+    --cab:#6e4ff0; --cab-deep:#4529b8;
+    --tile:#1f3f48; --lip:#2c7d77; --lip-edge:#43a59d;
+    --shadow:rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16102b; --dot:#221a42; --surface:#221a41; --surface-2:#2e2459;
+  --ink:#f2edff; --muted:#b7abe0; --line:#3c3070;
+  --accent:#a58bff; --accent-deep:#7357e0; --on-accent:#17102e;
+  --pink-soft:#4a2745; --mint-soft:#1f4244; --sun-soft:#4a3f1d; --sky-soft:#23396b;
+  --hl:rgba(255,210,77,.3);
+  --cab:#6e4ff0; --cab-deep:#4529b8;
+  --tile:#1f3f48; --lip:#2c7d77; --lip-edge:#43a59d;
+  --shadow:rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 1.6px, transparent 1.6px);
+  background-size:30px 30px;
+  color:var(--ink);
+  font-family:var(--font-body); font-size:17px; line-height:1.55;
+  padding-block:0 40px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap{max-width:1120px;margin-inline:auto}
+h1,h2,h3{font-family:var(--font-display);margin:0;line-height:1.1;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg{display:block}
+
+/* Header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:20px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--font-display);font-weight:700;font-size:1.5rem;letter-spacing:-.01em}
+.logo svg{width:42px;height:42px}
+.nav{display:flex;align-items:center;gap:6px}
+.nav a.link{font-weight:800;text-decoration:none;padding:10px 14px;border-radius:999px;color:var(--muted)}
+.nav a.link:hover{background:var(--surface-2);color:var(--ink)}
+.theme{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center}
+.theme svg{width:22px;height:22px}
+.theme .sun{display:none}
+.theme[data-mode="dark"] .sun{display:block}
+.theme[data-mode="dark"] .moon{display:none}
+@media (max-width:560px){.nav a.link{display:none}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 24px;border-radius:999px;border:0;cursor:pointer;
+  font-family:var(--font-display);font-weight:600;font-size:1.05rem;text-decoration:none;transition:transform .08s ease, box-shadow .08s ease}
+.btn:active{transform:translateY(3px)}
+.btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:0 4px 0 var(--accent-deep)}
+.btn-primary:active{box-shadow:0 1px 0 var(--accent-deep)}
+.btn-ghost{background:var(--surface);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn-ghost:active{box-shadow:0 1px 0 var(--line)}
+.btn-pink{background:var(--pink);color:#3a2a55;box-shadow:0 4px 0 var(--pink-deep)}
+.btn-pink:active{box-shadow:0 1px 0 var(--pink-deep)}
+.btn[disabled]{opacity:.65;cursor:default}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:40px 48px;align-items:center;padding-block:24px 64px}
+.eyebrow{font-family:var(--font-pixel);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+.hero h1{font-size:clamp(2.7rem,6.4vw,4.6rem);font-weight:700;letter-spacing:-.02em}
+.hl{background:linear-gradient(transparent 60%, var(--hl) 60% 92%, transparent 92%);padding-inline:.08em}
+.hero .lede{font-size:1.18rem;color:var(--muted);max-width:34ch;margin-top:20px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}}
+
+/* Cabinet */
+.cab{background:var(--cab);border-radius:30px 30px 22px 22px;padding:14px 14px 18px;max-width:540px;width:100%;margin-inline:auto;
+  box-shadow:0 8px 0 var(--cab-deep), 0 30px 44px -20px var(--shadow)}
+.marquee{display:flex;align-items:center;justify-content:center;gap:12px;background:var(--marquee);color:var(--marquee-ink);border-radius:18px;padding:10px 12px;margin-bottom:12px;
+  font-family:var(--font-pixel);font-weight:700;letter-spacing:.12em;font-size:clamp(.82rem,3.2vw,1.1rem);text-transform:uppercase;white-space:nowrap}
+.bulbs{display:flex;gap:5px}
+.bulbs i{width:8px;height:8px;border-radius:50%;background:var(--pink);animation:blink 1.4s ease-in-out infinite alternate}
+.bulbs i:nth-child(even){background:var(--mint);animation-delay:.7s}
+@keyframes blink{to{opacity:.3}}
+.screen{position:relative;background:var(--screen);border:4px solid var(--cab-deep);border-radius:20px;padding:12px}
+.hud{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}
+.stat{flex:1;min-width:0;background:rgba(255,255,255,.07);border-radius:12px;padding:6px 10px;text-align:center}
+.stat span{display:block;font-family:var(--font-pixel);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--screen-muted)}
+.stat b{display:block;font-family:var(--font-pixel);font-size:1.15rem;color:var(--screen-ink);font-variant-numeric:tabular-nums}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.card{position:relative;aspect-ratio:1;padding:0;border:0;background:none;cursor:pointer;perspective:600px;-webkit-tap-highlight-color:transparent}
+.card .inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .42s cubic-bezier(.3,1.3,.5,1)}
+.card.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center;overflow:hidden}
+.face.back{background:
+  radial-gradient(circle at 50% 50%, var(--sun) 0 7%, transparent 8%),
+  repeating-linear-gradient(45deg, var(--accent) 0 8px, var(--accent-deep) 8px 16px);
+  border:3px solid #fff3}
+.face.front{background:var(--cardface);transform:rotateY(180deg);border:3px solid transparent;padding:4px}
+.face.front svg{width:100%;height:100%}
+.card.matched .face.front{border-color:var(--mint);background:#e9fff7}
+.card.matched .inner{animation:pop .4s ease}
+@keyframes pop{50%{transform:rotateY(180deg) scale(1.1)}}
+.win{position:absolute;inset:0;border-radius:16px;background:rgba(37,27,75,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;z-index:3}
+.win-title{font-family:var(--font-display);font-weight:700;font-size:2rem;color:var(--screen-ink)}
+.win p{color:var(--screen-muted);max-width:26ch}
+.win .pair{display:flex;gap:6px}
+.win .pair svg{width:54px;height:54px}
+.panel{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding-inline:6px}
+.stick{width:54px;height:54px;border-radius:50%;background:var(--cab-deep);position:relative;flex:none}
+.stick::before{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-22px 0 0 -15px;border-radius:50%;background:var(--pink);box-shadow:0 4px 0 var(--pink-deep)}
+.dots{display:flex;gap:10px;flex:none}
+.dots i{width:26px;height:26px;border-radius:50%;box-shadow:0 4px 0 rgba(0,0,0,.22)}
+.dots i:first-child{background:var(--mint)}
+.dots i:last-child{background:var(--sun)}
+@media (max-width:420px){.stick{display:none}.panel{justify-content:space-between}}
+
+/* Sections */
+section{padding-block:56px 12px;scroll-margin-top:8px}
+.sec-head{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.sec-head .eyebrow{margin-bottom:0}
+.sec-head h2{font-size:clamp(1.9rem,4.4vw,2.9rem);font-weight:700;letter-spacing:-.015em}
+.sec-head p{color:var(--muted);max-width:52ch}
+
+/* Game shelf */
+.shelf{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:20px}
+.game{display:flex;flex-direction:column;background:var(--surface);border:2px solid var(--line);border-radius:26px;overflow:hidden}
+.art{height:150px;display:flex;align-items:flex-end;justify-content:center;gap:8px;padding-top:16px}
+.art svg{width:96px;height:96px;margin-bottom:-4px}
+.art.a1{background:var(--pink-soft)} .art.a2{background:var(--mint-soft)} .art.a3{background:var(--sky-soft)} .art.a4{background:var(--sun-soft)}
+.game .body{display:flex;flex-direction:column;gap:8px;padding:18px 20px 22px;flex:1}
+.game h3{font-size:1.4rem;font-weight:600}
+.game p{color:var(--muted);flex:1}
+.tag{align-self:flex-start;margin-top:8px;font-family:var(--font-pixel);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;border-radius:999px;text-decoration:none}
+.tag.go{background:var(--accent);color:var(--on-accent)}
+.tag.soon{background:var(--surface-2);color:var(--muted)}
+
+/* Bop the Slime */
+.bop{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:32px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:34px;padding:clamp(20px,4vw,40px);box-shadow:0 8px 0 var(--line)}
+.bop-info{display:flex;flex-direction:column;gap:18px;min-width:0}
+.bop-info h2{font-size:clamp(1.9rem,4.4vw,2.9rem);font-weight:700}
+.bop-info .sub{color:var(--muted);max-width:38ch}
+.scores{display:flex;gap:12px;flex-wrap:wrap}
+.chip{background:var(--surface-2);border-radius:18px;padding:10px 16px;min-width:92px}
+.chip span{display:block;font-family:var(--font-pixel);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.chip b{display:block;font-family:var(--font-pixel);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.meter{height:12px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--mint),var(--sun),var(--pink));transform-origin:left;transform:scaleX(1);border-radius:999px}
+.msg{min-height:1.6em;font-weight:800}
+.bop-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:460px;width:100%;margin-inline:auto}
+.hole{position:relative;aspect-ratio:1;border:0;padding:0;border-radius:22px;overflow:hidden;background:var(--tile);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hole::before{content:"";position:absolute;left:8%;right:8%;bottom:10%;height:30%;border-radius:50%;background:var(--pit)}
+.hole::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24%;background:var(--lip);border-top:3px solid var(--lip-edge);z-index:2}
+.pop{position:absolute;left:12%;right:12%;bottom:6%;height:82%;z-index:1;transform:translateY(112%);transition:transform .14s cubic-bezier(.3,1.5,.5,1)}
+.pop svg{width:100%;height:100%}
+.hole.up .pop{transform:translateY(0)}
+.hole.bonked .pop{transform:translateY(40%) scaleY(.78)}
+.pts{position:absolute;left:50%;top:12%;z-index:3;transform:translateX(-50%);font-family:var(--font-pixel);font-weight:700;font-size:1.3rem;color:var(--accent-deep);background:var(--sun);padding:2px 8px;border-radius:10px;pointer-events:none;animation:rise .65s ease-out forwards}
+@keyframes rise{from{transform:translate(-50%,10px);opacity:1}to{transform:translate(-50%,-26px);opacity:0}}
+
+/* Pals */
+.pals{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:20px}
+.pal{display:flex;gap:14px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:24px;padding:14px}
+.pal .disc{flex:none;width:84px;height:84px;border-radius:50%;background:var(--disc);display:grid;place-items:center;padding:8px}
+.pal .disc svg{width:100%;height:100%}
+.pal div{min-width:0}
+.pal h3{font-size:1.25rem;font-weight:600}
+.pal p{color:var(--muted);font-size:.95rem;line-height:1.4;margin-top:2px}
+
+footer{margin-top:64px;padding-top:24px;border-top:2px dashed var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;color:var(--muted);font-size:.95rem}
+footer b{font-family:var(--font-display);color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="#top" id="top" aria-label="Mochi Arcade home">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#mascot"/></svg>
+      Mochi Arcade
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a class="link" href="#play">Play</a>
+      <a class="link" href="#games">Games</a>
+      <a class="link" href="#pals">Pals</a>
+      <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <p class="eyebrow">Pocket arcade · 2 games · 8 pals</p>
+        <h1>Tiny games. <span class="hl">Big cozy</span> energy.</h1>
+        <p class="lede">Mochi Arcade is a pocket-sized arcade of two-minute games and eight very round friends. Flip some cards, bop some slimes, beat your own best.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#play">Play Mochi Match</a>
+          <a class="btn btn-ghost" href="#bop">Bop the Slime</a>
+        </div>
+      </div>
+
+      <div class="cab" id="play">
+        <div class="marquee" aria-hidden="true">
+          <span class="bulbs"><i></i><i></i><i></i><i></i></span>
+          Mochi Match
+          <span class="bulbs"><i></i><i></i><i></i><i></i></span>
+        </div>
+        <div class="screen">
+          <div class="hud">
+            <div class="stat"><span>Moves</span><b id="moves">0</b></div>
+            <div class="stat"><span>Time</span><b id="time">0:00</b></div>
+            <div class="stat"><span>Best</span><b id="best">--</b></div>
+          </div>
+          <div class="board" id="board" role="group" aria-label="Memory cards, four by four"></div>
+          <div class="win" id="win" hidden>
+            <div class="pair" id="winPair" aria-hidden="true"></div>
+            <p class="win-title">All matched!</p>
+            <p id="winText"></p>
+            <button class="btn btn-pink" id="again" type="button">Play again</button>
+          </div>
+        </div>
+        <div class="panel">
+          <span class="stick" aria-hidden="true"></span>
+          <button class="btn btn-pink" id="reset" type="button">New game</button>
+          <span class="dots" aria-hidden="true"><i></i><i></i></span>
+        </div>
+        <p class="sr" id="matchLive" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <section id="games">
+      <div class="sec-head">
+        <p class="eyebrow">The shelf</p>
+        <h2>Pick a game</h2>
+        <p>Two are ready to play right now. The next two are still baking.</p>
+      </div>
+      <div class="shelf">
+        <article class="game">
+          <div class="art a1" data-pals="cat,bunny"></div>
+          <div class="body">
+            <h3>Mochi Match</h3>
+            <p>Flip two cards at a time and match all eight pals. Fewer moves is a better score.</p>
+            <a class="tag go" href="#play">Play now</a>
+          </div>
+        </article>
+        <article class="game">
+          <div class="art a2" data-pals="slime"></div>
+          <div class="body">
+            <h3>Bop the Slime</h3>
+            <p>Thirty seconds, nine holes, one very bouncy crowd. Golden slimes count for three.</p>
+            <a class="tag go" href="#bop">Play now</a>
+          </div>
+        </article>
+        <article class="game">
+          <div class="art a3" data-pals="ghost"></div>
+          <div class="body">
+            <h3>Cloud Hop</h3>
+            <p>Guide Wisp up a staircase of clouds without missing a step.</p>
+            <span class="tag soon">Coming soon</span>
+          </div>
+        </article>
+        <article class="game">
+          <div class="art a4" data-pals="chick"></div>
+          <div class="body">
+            <h3>Bakery Rush</h3>
+            <p>Stack buns for Yuzu's morning crowd before the oven timer rings.</p>
+            <span class="tag soon">Coming soon</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="bop">
+      <div class="bop">
+        <div class="bop-info">
+          <p class="eyebrow">Game two</p>
+          <h2>Bop the Slime</h2>
+          <p class="sub">Slimes pop up for a moment. Tap them before they duck back down. They get quicker the longer you last.</p>
+          <div class="scores">
+            <div class="chip"><span>Score</span><b id="score">0</b></div>
+            <div class="chip"><span>Time</span><b id="left">30s</b></div>
+            <div class="chip"><span>Best</span><b id="bopBest">0</b></div>
+          </div>
+          <div class="meter" aria-hidden="true"><i id="fill"></i></div>
+          <p class="msg" id="bopMsg" aria-live="polite">Press start. Golden slimes are worth 3 points.</p>
+          <div><button class="btn btn-primary" id="start" type="button">Start</button></div>
+        </div>
+        <div class="bop-board" id="bopBoard" role="group" aria-label="Nine slime holes"></div>
+      </div>
+    </section>
+
+    <section id="pals">
+      <div class="sec-head">
+        <p class="eyebrow">The regulars</p>
+        <h2>Meet the pals</h2>
+        <p>Eight round friends live in the arcade. You will see all of them in Mochi Match.</p>
+      </div>
+      <div class="pals" id="palGrid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span><b>Mochi Arcade</b> · small games for small breaks</span>
+    <span>Best scores are saved on this device only.</span>
+  </footer>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="mascot">
+      <path d="M14 84 C8 58 24 28 50 28 C76 28 92 58 86 84 Q50 94 14 84 Z" fill="var(--c-slime)" stroke="var(--face)" stroke-width="4" stroke-linejoin="round"/>
+      <ellipse cx="33" cy="47" rx="7" ry="4" transform="rotate(-30 33 47)" fill="#fff" opacity=".65"/>
+      <circle cx="38" cy="62" r="4.4" fill="var(--face)"/><circle cx="62" cy="62" r="4.4" fill="var(--face)"/>
+      <ellipse cx="27" cy="71" rx="6" ry="4" fill="#ff8fb8" opacity=".6"/><ellipse cx="73" cy="71" rx="6" ry="4" fill="#ff8fb8" opacity=".6"/>
+      <path d="M45 70 Q47.5 74 50 70 Q52.5 74 55 70" fill="none" stroke="var(--face)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </defs>
+</svg>
+
+<script>
+(function(){
+  /* ---------- helpers ---------- */
+  function store(k,v){
+    try{
+      if(v===undefined) return localStorage.getItem(k);
+      localStorage.setItem(k,String(v));
+    }catch(e){ return null; }
+  }
+  var S='stroke="var(--face)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"';
+  function eyes(y){
+    return '<circle cx="38" cy="'+y+'" r="4.2" fill="var(--face)"/><circle cx="62" cy="'+y+'" r="4.2" fill="var(--face)"/>'+
+           '<circle cx="39.6" cy="'+(y-1.6)+'" r="1.4" fill="#fff"/><circle cx="63.6" cy="'+(y-1.6)+'" r="1.4" fill="#fff"/>';
+  }
+  function cheeks(y){
+    return '<ellipse cx="27" cy="'+y+'" rx="6" ry="4" fill="#ff8fb8" opacity=".6"/><ellipse cx="73" cy="'+y+'" rx="6" ry="4" fill="#ff8fb8" opacity=".6"/>';
+  }
+  function mouth(y){
+    return '<path d="M45 '+y+' Q47.5 '+(y+4)+' 50 '+y+' Q52.5 '+(y+4)+' 55 '+y+'" fill="none" stroke="var(--face)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  var PALS=[
+    {id:'cat',   name:'Miso',    trait:'Naps between rounds and still posts a top score.'},
+    {id:'bunny', name:'Pudding', trait:'Hops to every card twice before you do.'},
+    {id:'bear',  name:'Bao',     trait:'Slow and steady, and never misses a pair.'},
+    {id:'frog',  name:'Pond',    trait:'Counts your moves out loud in ribbits.'},
+    {id:'chick', name:'Yuzu',    trait:'Tiny, loud, and first in line for the next game.'},
+    {id:'ghost', name:'Wisp',    trait:'Floats through every level and blames the wind for misses.'},
+    {id:'slime', name:'Jelly',   trait:'The one you keep bopping. Bounces back every time.'},
+    {id:'panda', name:'Dumpling',trait:'Snacks during every loading screen.'}
+  ];
+  var NAME={}; PALS.forEach(function(p){NAME[p.id]=p.name;});
+
+  function creature(id, gold){
+    var b='';
+    switch(id){
+      case 'cat':
+        b='<polygon points="20,42 26,10 47,28" fill="var(--c-cat)" '+S+'/><polygon points="80,42 74,10 53,28" fill="var(--c-cat)" '+S+'/>'+
+          '<polygon points="28,32 30,19 40,28" fill="#ff8fb8"/><polygon points="72,32 70,19 60,28" fill="#ff8fb8"/>'+
+          '<circle cx="50" cy="58" r="33" fill="var(--c-cat)" '+S+'/>'+
+          '<path d="M13 58 L25 61 M13 68 L25 66 M87 58 L75 61 M87 68 L75 66" stroke="var(--face)" stroke-width="2.2" stroke-linecap="round" fill="none"/>'+
+          eyes(55)+cheeks(66)+mouth(66);
+        break;
+      case 'bunny':
+        b='<ellipse cx="36" cy="22" rx="10" ry="21" fill="var(--c-bunny)" '+S+'/><ellipse cx="64" cy="22" rx="10" ry="21" fill="var(--c-bunny)" '+S+'/>'+
+          '<ellipse cx="36" cy="25" rx="4.5" ry="12" fill="#ffb4d0"/><ellipse cx="64" cy="25" rx="4.5" ry="12" fill="#ffb4d0"/>'+
+          '<circle cx="50" cy="64" r="31" fill="var(--c-bunny)" '+S+'/>'+
+          eyes(61)+cheeks(71)+mouth(70);
+        break;
+      case 'bear':
+        b='<circle cx="24" cy="34" r="12" fill="var(--c-bear)" '+S+'/><circle cx="76" cy="34" r="12" fill="var(--c-bear)" '+S+'/>'+
+          '<circle cx="24" cy="34" r="5.5" fill="#cf8f5c"/><circle cx="76" cy="34" r="5.5" fill="#cf8f5c"/>'+
+          '<circle cx="50" cy="58" r="33" fill="var(--c-bear)" '+S+'/>'+
+          '<ellipse cx="50" cy="68" rx="14" ry="10.5" fill="#f6dcc0"/><ellipse cx="50" cy="63.5" rx="4.5" ry="3.2" fill="var(--face)"/>'+
+          eyes(52)+cheeks(62)+mouth(71);
+        break;
+      case 'frog':
+        b='<circle cx="30" cy="34" r="14" fill="var(--c-frog)" '+S+'/><circle cx="70" cy="34" r="14" fill="var(--c-frog)" '+S+'/>'+
+          '<ellipse cx="50" cy="62" rx="38" ry="30" fill="var(--c-frog)" '+S+'/>'+
+          '<circle cx="30" cy="34" r="8.5" fill="#fff"/><circle cx="70" cy="34" r="8.5" fill="#fff"/>'+
+          '<circle cx="31.5" cy="35" r="4.6" fill="var(--face)"/><circle cx="71.5" cy="35" r="4.6" fill="var(--face)"/>'+
+          '<circle cx="33" cy="33" r="1.4" fill="#fff"/><circle cx="73" cy="33" r="1.4" fill="#fff"/>'+
+          cheeks(64)+'<path d="M30 62 Q50 82 70 62" fill="none" stroke="var(--face)" stroke-width="3" stroke-linecap="round"/>';
+        break;
+      case 'chick':
+        b='<path d="M42 27 Q43 11 50 23 Q57 9 58 27" fill="var(--c-chick)" '+S+'/>'+
+          '<ellipse cx="16" cy="62" rx="8" ry="12" fill="#ffd04a" '+S+'/><ellipse cx="84" cy="62" rx="8" ry="12" fill="#ffd04a" '+S+'/>'+
+          '<circle cx="50" cy="58" r="33" fill="var(--c-chick)" '+S+'/>'+
+          '<polygon points="42,62 58,62 50,73" fill="#ff9a3c" '+S+'/>'+
+          eyes(52)+cheeks(64);
+        break;
+      case 'ghost':
+        b='<path d="M18 88 V54 A32 32 0 0 1 82 54 V88 L71 80 L60.5 88 L50 80 L39.5 88 L29 80 Z" fill="var(--c-ghost)" '+S+'/>'+
+          eyes(50)+cheeks(60)+'<ellipse cx="50" cy="63" rx="3.6" ry="4.6" fill="var(--face)"/>';
+        break;
+      case 'slime':
+        b=(gold?'<polygon points="50,4 53.5,14 64,14 55.5,20.5 58.8,30 50,24 41.2,30 44.5,20.5 36,14 46.5,14" fill="#fff3a0" '+S+'/>':'')+
+          '<path d="M14 84 C8 58 24 28 50 28 C76 28 92 58 86 84 Q50 94 14 84 Z" fill="'+(gold?'var(--c-gold)':'var(--c-slime)')+'" '+S+'/>'+
+          '<ellipse cx="33" cy="47" rx="7" ry="4" transform="rotate(-30 33 47)" fill="#fff" opacity=".65"/>'+
+          eyes(62)+cheeks(71)+mouth(70);
+        break;
+      case 'panda':
+        b='<circle cx="24" cy="34" r="12" fill="#3a2a55" '+S+'/><circle cx="76" cy="34" r="12" fill="#3a2a55" '+S+'/>'+
+          '<circle cx="50" cy="58" r="33" fill="var(--c-panda)" '+S+'/>'+
+          '<ellipse cx="36" cy="55" rx="8" ry="10.5" transform="rotate(-20 36 55)" fill="#3a2a55"/><ellipse cx="64" cy="55" rx="8" ry="10.5" transform="rotate(20 64 55)" fill="#3a2a55"/>'+
+          '<circle cx="37" cy="54" r="3.4" fill="#fff"/><circle cx="63" cy="54" r="3.4" fill="#fff"/>'+
+          '<ellipse cx="50" cy="66" rx="4.6" ry="3.2" fill="var(--face)"/>'+mouth(71);
+        break;
+    }
+    return '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">'+b+'</svg>';
+  }
+
+  /* ---------- static art: shelf + pals ---------- */
+  document.querySelectorAll('.art').forEach(function(el){
+    el.innerHTML = el.getAttribute('data-pals').split(',').map(function(id){return creature(id);}).join('');
+  });
+  document.getElementById('palGrid').innerHTML = PALS.map(function(p){
+    return '<article class="pal"><div class="disc">'+creature(p.id)+'</div><div><h3>'+p.name+'</h3><p>'+p.trait+'</p></div></article>';
+  }).join('');
+
+  /* ---------- theme toggle ---------- */
+  var root=document.documentElement, themeBtn=document.getElementById('theme');
+  var mq=window.matchMedia('(prefers-color-scheme: dark)');
+  function isDark(){ var t=root.getAttribute('data-theme'); return t ? t==='dark' : mq.matches; }
+  function syncTheme(){ themeBtn.setAttribute('data-mode', isDark()?'dark':'light'); }
+  var saved=store('mochi.theme'); if(saved==='dark'||saved==='light') root.setAttribute('data-theme',saved);
+  themeBtn.addEventListener('click',function(){
+    var next=isDark()?'light':'dark'; root.setAttribute('data-theme',next); store('mochi.theme',next); syncTheme();
+  });
+  if(mq.addEventListener) mq.addEventListener('change',syncTheme);
+  syncTheme();
+
+  /* ---------- Mochi Match ---------- */
+  var IDS=PALS.map(function(p){return p.id;});
+  var board=document.getElementById('board'), movesEl=document.getElementById('moves'),
+      timeEl=document.getElementById('time'), bestEl=document.getElementById('best'),
+      winEl=document.getElementById('win'), winText=document.getElementById('winText'),
+      winPair=document.getElementById('winPair'), live=document.getElementById('matchLive');
+  var deck=[], first=null, lock=false, matched=0, moves=0, t0=0, timer=null;
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function fmt(ms){ var s=Math.floor(ms/1000); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  function showBest(){ var b=parseInt(store('mochi.match.best'),10); bestEl.textContent = b ? String(b) : '--'; }
+  function newMatch(){
+    clearInterval(timer); timer=null; first=null; lock=false; matched=0; moves=0; t0=0;
+    deck=shuffle(IDS.concat(IDS));
+    board.innerHTML = deck.map(function(id,i){
+      return '<button class="card" type="button" data-i="'+i+'" aria-label="Card '+(i+1)+', face down"><span class="inner"><span class="face back"></span><span class="face front">'+creature(id)+'</span></span></button>';
+    }).join('');
+    movesEl.textContent='0'; timeEl.textContent='0:00'; winEl.hidden=true; showBest();
+    live.textContent='New game. Sixteen cards, eight pairs.';
+  }
+  function reveal(btn){
+    var i=+btn.getAttribute('data-i');
+    btn.classList.add('flipped');
+    btn.setAttribute('aria-label','Card '+(i+1)+', '+NAME[deck[i]]);
+  }
+  function hide(btn){
+    var i=+btn.getAttribute('data-i');
+    btn.classList.remove('flipped');
+    btn.setAttribute('aria-label','Card '+(i+1)+', face down');
+  }
+  board.addEventListener('click',function(e){
+    var btn=e.target.closest('.card');
+    if(!btn||lock||btn===first) return;
+    if(btn.classList.contains('flipped')||btn.classList.contains('matched')) return;
+    if(!t0){ t0=Date.now(); timer=setInterval(function(){ timeEl.textContent=fmt(Date.now()-t0); },250); }
+    reveal(btn);
+    if(!first){ first=btn; return; }
+    moves++; movesEl.textContent=String(moves);
+    var a=first, b=btn; first=null;
+    var ia=+a.getAttribute('data-i'), ib=+b.getAttribute('data-i');
+    if(deck[ia]===deck[ib]){
+      a.classList.add('matched'); b.classList.add('matched'); matched++;
+      live.textContent='Matched '+NAME[deck[ia]]+'. '+matched+' of 8 pairs.';
+      if(matched===8) finishMatch();
+    }else{
+      lock=true;
+      setTimeout(function(){ hide(a); hide(b); lock=false; },800);
+    }
+  });
+  function finishMatch(){
+    clearInterval(timer); timer=null;
+    var elapsed=Date.now()-t0;
+    var best=parseInt(store('mochi.match.best'),10);
+    var isBest=!best||moves<best;
+    if(isBest) store('mochi.match.best',moves);
+    showBest();
+    winText.textContent = 'You matched all 8 pals in '+moves+' moves and '+fmt(elapsed)+'.'+(isBest?' That is your best so far.':'');
+    winPair.innerHTML = [creature('cat'),creature('bunny'),creature('slime')].join('');
+    setTimeout(function(){ winEl.hidden=false; document.getElementById('again').focus({preventScroll:true}); },650);
+  }
+  document.getElementById('reset').addEventListener('click',newMatch);
+  document.getElementById('again').addEventListener('click',newMatch);
+  newMatch();
+
+  /* ---------- Bop the Slime ---------- */
+  var bopBoard=document.getElementById('bopBoard'), scoreEl=document.getElementById('score'),
+      leftEl=document.getElementById('left'), bopBestEl=document.getElementById('bopBest'),
+      fillEl=document.getElementById('fill'), bopMsg=document.getElementById('bopMsg'),
+      startBtn=document.getElementById('start');
+  var SLIME=creature('slime'), GOLD=creature('slime',true);
+  var DUR=30000;
+  bopBoard.innerHTML = Array.apply(null,Array(9)).map(function(_,i){
+    return '<button class="hole" type="button" aria-label="Hole '+(i+1)+'"><span class="pop">'+SLIME+'</span></button>';
+  }).join('');
+  var holes=[].slice.call(bopBoard.querySelectorAll('.hole'));
+  var bop={running:false,score:0,t0:0,end:0,spawnT:null,tickT:null,timers:[]};
+  bopBestEl.textContent = String(parseInt(store('mochi.bop.best'),10)||0);
+  holes[4].classList.add('up');   // a friendly slime waiting in the middle
+
+  function clearHole(h){ if(bop.timers[holes.indexOf(h)]){ clearTimeout(bop.timers[holes.indexOf(h)]); bop.timers[holes.indexOf(h)]=null; } }
+  function startBop(){
+    holes.forEach(function(h){ clearHole(h); h.classList.remove('up','bonked'); h.removeAttribute('data-kind'); });
+    bop.running=true; bop.score=0; bop.t0=performance.now(); bop.end=bop.t0+DUR;
+    scoreEl.textContent='0'; leftEl.textContent='30s'; fillEl.style.transform='scaleX(1)';
+    startBtn.disabled=true; startBtn.textContent='Bopping...';
+    bopMsg.textContent='Go go go!';
+    tick(); spawn();
+  }
+  function tick(){
+    var left=Math.max(0,bop.end-performance.now());
+    leftEl.textContent=Math.ceil(left/1000)+'s';
+    fillEl.style.transform='scaleX('+(left/DUR)+')';
+    if(left<=0){ endBop(); return; }
+    bop.tickT=setTimeout(tick,100);
+  }
+  function spawn(){
+    if(!bop.running) return;
+    var elapsed=(performance.now()-bop.t0)/1000;
+    var free=holes.filter(function(h){ return !h.classList.contains('up'); });
+    if(free.length){
+      var h=free[Math.floor(Math.random()*free.length)];
+      var gold=Math.random()<0.16;
+      h.setAttribute('data-kind',gold?'gold':'slime');
+      h.querySelector('.pop').innerHTML=gold?GOLD:SLIME;
+      h.classList.add('up');
+      var life=Math.max(520,1050-elapsed*18), idx=holes.indexOf(h);
+      bop.timers[idx]=setTimeout(function(){ h.classList.remove('up'); bop.timers[idx]=null; },life);
+    }
+    bop.spawnT=setTimeout(spawn,Math.max(330,780-elapsed*14));
+  }
+  bopBoard.addEventListener('click',function(e){
+    var h=e.target.closest('.hole');
+    if(!h||!bop.running||!h.classList.contains('up')||h.classList.contains('bonked')) return;
+    clearHole(h);
+    var pts=h.getAttribute('data-kind')==='gold'?3:1;
+    bop.score+=pts; scoreEl.textContent=String(bop.score);
+    h.classList.add('bonked');
+    var tag=document.createElement('span'); tag.className='pts'; tag.textContent='+'+pts; h.appendChild(tag);
+    setTimeout(function(){ if(tag.parentNode) tag.parentNode.removeChild(tag); },700);
+    setTimeout(function(){ h.classList.remove('up','bonked'); },190);
+  });
+  function endBop(){
+    bop.running=false; clearTimeout(bop.spawnT); clearTimeout(bop.tickT);
+    holes.forEach(function(h){ clearHole(h); h.classList.remove('up','bonked'); });
+    leftEl.textContent='0s'; fillEl.style.transform='scaleX(0)';
+    var best=parseInt(store('mochi.bop.best'),10)||0, isBest=bop.score>best;
+    if(isBest){ store('mochi.bop.best',bop.score); bopBestEl.textContent=String(bop.score); }
+    bopMsg.textContent='Time! You scored '+bop.score+' points.'+(isBest&&bop.score>0?' New best!':'');
+    startBtn.disabled=false; startBtn.textContent='Play again';
+  }
+  startBtn.addEventListener('click',startBop);
+})();
+</script>
+
+</body></html>
